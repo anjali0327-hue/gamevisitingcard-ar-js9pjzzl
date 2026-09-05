@@ -3,114 +3,164 @@
     <head>
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
         <!-- A-Frame and AR.js Core Libraries -->
-        <script src="https://aframe.io/releases/1.0.4/aframe.min.js"></script>
+        <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
         <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
-        <script src="https://raw.githack.com/donmccurdy/aframe-extras/master/dist/aframe-extras.loaders.min.js"></script>
-        <script src="https://raw.githack.com/AR-js-org/studio-backend/master/src/modules/marker/tools/gesture-detector.js"></script>
-        <script src="https://raw.githack.com/AR-js-org/studio-backend/master/src/modules/marker/tools/gesture-handler.js"></script>
+        <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v6.1.1/dist/aframe-extras.min.js"></script>
+        <!-- HTML Embed / Canvas Renderer for HTML in 3D Space -->
+        <script src="https://supereight.github.io/aframe-html-embed/dist/aframe-html-embed.min.js"></script>
 
         <style>
-            /* Glassmorphism Info Overlay */
-            #info-card {
-                position: fixed;
-                bottom: 25px;
-                left: 50%;
-                transform: translateX(-50%);
-                width: 85%;
-                max-width: 360px;
-                background: rgba(20, 20, 25, 0.88);
+            /* HTML Container for 3D Floating AR Screen */
+            .ar-card {
+                width: 400px;
+                height: 260px;
+                background: rgba(18, 18, 24, 0.82);
+                border: 2px solid #ff9933;
+                border-radius: 20px;
                 color: #ffffff;
-                padding: 18px;
-                border-radius: 16px;
                 font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-                box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-                backdrop-filter: blur(8px);
-                -webkit-backdrop-filter: blur(8px);
-                border: 1px solid rgba(255, 255, 255, 0.18);
-                z-index: 9999;
-                text-align: center;
+                padding: 16px;
                 box-sizing: border-box;
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+                box-shadow: 0 0 20px rgba(255, 153, 51, 0.4);
             }
 
-            #info-card h3 {
-                margin: 0 0 8px 0;
-                color: #0078f2;
-                font-size: 1.2rem;
+            .ar-header {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+                padding-bottom: 8px;
+            }
+
+            .ar-header h2 {
+                margin: 0;
+                font-size: 1.1rem;
+                color: #ff9933;
                 text-transform: uppercase;
                 letter-spacing: 1px;
             }
 
-            #info-card p {
-                margin: 0;
-                font-size: 0.95rem;
-                line-height: 1.4;
-                color: #e0e0e0;
+            .ar-body {
+                display: flex;
+                gap: 12px;
+                margin-top: 10px;
+                align-items: center;
             }
 
-            #info-card .hint {
-                display: block;
-                margin-top: 10px;
+            .ar-body img {
+                width: 100px;
+                height: 100px;
+                border-radius: 12px;
+                object-fit: cover;
+                border: 1px solid #138808;
+            }
+
+            .ar-body p {
+                margin: 0;
+                font-size: 0.85rem;
+                line-height: 1.35;
+                color: #e0e0e0;
+                flex: 1;
+            }
+
+            .ar-footer {
                 font-size: 0.75rem;
                 color: #888;
+                text-align: center;
                 font-style: italic;
+                margin-top: 6px;
             }
         </style>
 
         <script>
-            // Gaming Company Data Array
-            const gamingCompanyData = [
+            // KHEL ADDA Dataset
+            const khelAddaData = [
                 {
-                    title: "🎮 Company Profile",
-                    text: "Epic Games — Founded in 1991. Leading developer in interactive entertainment and 3D engine technology."
+                    title: "🎲 ROLL A 6 TO UNLOCK",
+                    text: "Tap the dice to roll a 6 and discover how KHEL ADDA is bringing traditional Indian board games back to your table!",
+                    image: "https://via.placeholder.com/100/ff9933/ffffff?text=KHEL+ADDA"
                 },
                 {
-                    title: "🔥 Flagship Titles",
-                    text: "Creators of Fortnite, Unreal Tournament, Gears of War, and Fall Guys."
+                    title: "🚩 KHEL ADDA — REIMAGINING CLASSICS",
+                    text: "An Indian board game design studio dedicated to reviving traditional and nostalgic Indian games through modern mechanics & storytelling.",
+                    image: "https://via.placeholder.com/100/138808/ffffff?text=Classics"
                 },
                 {
-                    title: "⚡ Core Tech",
-                    text: "Unreal Engine 5 — Powering next-gen photorealistic graphics across games, film, and AR/VR."
+                    title: "💡 CORE PHILOSOPHY",
+                    text: "Don't preserve Indian games in a museum. Put them back on the table. We preserve cultural identity while evolving gameplay mechanics.",
+                    image: "https://via.placeholder.com/100/000080/ffffff?text=Philosophy"
                 },
                 {
-                    title: "🛍️ Ecosystem",
-                    text: "Epic Games Store & Fab — Delivering global distribution and digital assets for millions of creators."
+                    title: "🛠️ MIXING OLD + NEW MECHANICS",
+                    text: "Blending Pachisi, Chowka Bara, and Gilli Danda with modern deck-building, worker placement, bluffing, and unique player powers.",
+                    image: "https://via.placeholder.com/100/ff9933/ffffff?text=Mechanics"
                 },
                 {
-                    title: "💼 Careers & Studio",
-                    text: "Headquartered in Cary, NC. Hiring globally across game design, real-time 3D, and engineering."
+                    title: "🎯 CARROM: STREET CHAMPIONS",
+                    text: "Classic Carrom with neighborhood characters, special abilities, objective cards, temporary rule changes, and regional board designs!",
+                    image: "https://via.placeholder.com/100/138808/ffffff?text=Carrom"
                 }
             ];
 
+            let hasUnlocked = false;
             let currentIndex = 0;
+            let isRolling = false;
 
-            // Interactive Click Component
-            AFRAME.registerComponent('dice-click-handler', {
+            AFRAME.registerComponent('fluid-dice-interaction', {
                 init: function () {
                     const el = this.el;
                     const cardTitle = document.getElementById('card-title');
                     const cardText = document.getElementById('card-text');
+                    const cardImg = document.getElementById('card-img');
+                    const cardHint = document.getElementById('card-hint');
 
                     el.addEventListener('click', function () {
-                        // Randomize target rotation angles to simulate a dice roll
-                        const randomX = Math.floor(Math.random() * 4 + 2) * 360 + (Math.floor(Math.random() * 4) * 90);
-                        const randomY = Math.floor(Math.random() * 4 + 2) * 360 + (Math.floor(Math.random() * 4) * 90);
+                        if (isRolling) return;
+                        isRolling = true;
 
-                        // Animate 3D object rotation
-                        el.setAttribute('animation', {
-                            property: 'rotation',
-                            to: `${randomX} ${randomY} 0`,
-                            dur: 1000,
+                        // Fluid spring-bounce animation simulating physical roll
+                        const rollDur = 1200;
+                        const targetRotX = Math.floor(Math.random() * 8 + 4) * 360 + (hasUnlocked ? Math.floor(Math.random() * 4) * 90 : 0);
+                        const targetRotY = Math.floor(Math.random() * 8 + 4) * 360 + (hasUnlocked ? Math.floor(Math.random() * 4) * 90 : 0);
+                        
+                        // Upward hop + multi-axis spin
+                        el.setAttribute('animation__bounce', {
+                            property: 'position',
+                            to: '0 0.8 0',
+                            dur: rollDur / 2,
+                            dir: 'alternate',
+                            loop: 1,
                             easing: 'easeOutQuad'
                         });
 
-                        // Cycle through information layers on complete
+                        el.setAttribute('animation__spin', {
+                            property: 'rotation',
+                            to: `${targetRotX} ${targetRotY} ${targetRotX / 2}`,
+                            dur: rollDur,
+                            easing: 'easeOutCubic'
+                        });
+
                         setTimeout(() => {
-                            currentIndex = (currentIndex + 1) % gamingCompanyData.length;
-                            const data = gamingCompanyData[currentIndex];
-                            
+                            isRolling = false;
+
+                            if (!hasUnlocked) {
+                                // First roll triggers the "Got a 6!" reveal
+                                hasUnlocked = true;
+                                currentIndex = 1; // First info slide
+                                cardHint.textContent = "🎲 Got a 6! Tap again to cycle information.";
+                            } else {
+                                // Subsequent single taps change information layer
+                                currentIndex = (currentIndex % (khelAddaData.length - 1)) + 1;
+                            }
+
+                            const data = khelAddaData[currentIndex];
                             cardTitle.textContent = data.title;
                             cardText.textContent = data.text;
-                        }, 500);
+                            cardImg.src = data.image;
+                        }, rollDur);
                     });
                 }
             });
@@ -118,27 +168,17 @@
     </head>
 
     <body style="margin: 0; overflow: hidden;">
-        <!-- Dynamic Overlay UI -->
-        <div id="info-card">
-            <h3 id="card-title">🎲 Tap the Dice</h3>
-            <p id="card-text">Scan the marker and click on the 3D dice to explore information layers about Epic Games.</p>
-            <span class="hint">Tap object in AR view to roll</span>
-        </div>
-
         <a-scene
             vr-mode-ui="enabled: false;"
             loading-screen="enabled: false;"
-            renderer="logarithmicDepthBuffer: true;"
+            renderer="logarithmicDepthBuffer: true; colorManagement: true;"
             arjs="trackingMethod: best; sourceType: webcam; debugUIEnabled: false;"
             id="scene"
             embedded
             gesture-detector
         >
             <a-assets>
-                <a-asset-item
-                    id="animated-asset"
-                    src="assets/asset.glb"
-                ></a-asset-item>
+                <a-asset-item id="dice-model" src="assets/asset.glb"></a-asset-item>
             </a-assets>
 
             <a-marker
@@ -148,15 +188,36 @@
                 url="assets/marker.patt"
                 emitevents="true"
             >
+                <!-- Interactive 3D Dice Object -->
                 <a-entity
-                    id="bowser-model"
+                    id="dice"
                     scale="0.2 0.2 0.2"
-                    animation-mixer="loop: repeat"
-                    gltf-model="#animated-asset"
+                    position="0 0.2 0"
+                    gltf-model="#dice-model"
                     class="clickable"
                     gesture-handler
-                    dice-click-handler
+                    fluid-dice-interaction
                 ></a-entity>
+
+                <!-- Floating 3D AR Transparent UI Display (Positioned Directly Above the Dice) -->
+                <a-entity 
+                    position="0 1.8 0" 
+                    rotation="-10 0 0"
+                    html-embed="transparent: true"
+                >
+                    <div class="ar-card">
+                        <div class="ar-header">
+                            <h2 id="card-title">🎲 ROLL A 6 TO UNLOCK</h2>
+                        </div>
+                        <div class="ar-body">
+                            <img id="card-img" src="https://via.placeholder.com/100/ff9933/ffffff?text=KHEL+ADDA" alt="Khel Adda Visual" />
+                            <p id="card-text">Tap the dice to roll a 6 and discover how KHEL ADDA is bringing traditional Indian board games back to your table!</p>
+                        </div>
+                        <div class="ar-footer" id="card-hint">
+                            Tap the 3D dice to roll for the first time
+                        </div>
+                    </div>
+                </a-entity>
             </a-marker>
 
             <!-- Camera with Raycaster for Click/Tap Detection -->
