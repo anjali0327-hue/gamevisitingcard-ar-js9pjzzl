@@ -10,21 +10,22 @@
         <script src="https://supereight.github.io/aframe-html-embed/dist/aframe-html-embed.min.js"></script>
 
         <style>
-            /* HTML Container for 3D Floating AR Screen */
+            /* HTML Container for 3D Floating AR Pop-up Card */
             .ar-card {
-                width: 400px;
-                height: 260px;
-                background: rgba(18, 18, 24, 0.82);
+                width: 380px;
+                min-height: 240px;
+                background: rgba(18, 18, 24, 0.88);
                 border: 2px solid #ff9933;
                 border-radius: 20px;
                 color: #ffffff;
                 font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-                padding: 16px;
+                padding: 18px;
                 box-sizing: border-box;
                 display: flex;
                 flex-direction: column;
                 justify-content: space-between;
-                box-shadow: 0 0 20px rgba(255, 153, 51, 0.4);
+                box-shadow: 0 0 25px rgba(255, 153, 51, 0.5);
+                backdrop-filter: blur(10px);
             }
 
             .ar-header {
@@ -37,7 +38,7 @@
 
             .ar-header h2 {
                 margin: 0;
-                font-size: 1.1rem;
+                font-size: 1.05rem;
                 color: #ff9933;
                 text-transform: uppercase;
                 letter-spacing: 1px;
@@ -51,8 +52,8 @@
             }
 
             .ar-body img {
-                width: 100px;
-                height: 100px;
+                width: 90px;
+                height: 90px;
                 border-radius: 12px;
                 object-fit: cover;
                 border: 1px solid #138808;
@@ -61,55 +62,59 @@
             .ar-body p {
                 margin: 0;
                 font-size: 0.85rem;
-                line-height: 1.35;
+                line-height: 1.4;
                 color: #e0e0e0;
                 flex: 1;
             }
 
             .ar-footer {
                 font-size: 0.75rem;
-                color: #888;
+                color: #aaa;
                 text-align: center;
                 font-style: italic;
-                margin-top: 6px;
+                margin-top: 10px;
             }
         </style>
 
         <script>
-            // KHEL ADDA Dataset
+            // Full KHEL ADDA Dataset (Pop-up sequence on every click)
             const khelAddaData = [
                 {
-                    title: "🎲 ROLL A 6 TO UNLOCK",
-                    text: "Tap the dice to roll a 6 and discover how KHEL ADDA is bringing traditional Indian board games back to your table!",
+                    title: "🎲 KHEL ADDA — REIMAGINING CLASSICS",
+                    text: "An Indian board game design studio dedicated to reviving traditional and nostalgic Indian games through contemporary game mechanics, storytelling, and visual design.",
                     image: "https://via.placeholder.com/100/ff9933/ffffff?text=KHEL+ADDA"
                 },
                 {
-                    title: "🚩 KHEL ADDA — REIMAGINING CLASSICS",
-                    text: "An Indian board game design studio dedicated to reviving traditional and nostalgic Indian games through modern mechanics & storytelling.",
-                    image: "https://via.placeholder.com/100/138808/ffffff?text=Classics"
+                    title: "🎯 WHAT WE SPECIALIZE IN",
+                    text: "Taking games people already know—Carrom, Pachisi, Chowka Bara, Gilli Danda, Pallankuzhi, Snakes & Ladders—and redesigning the way they are played without losing what makes them Indian.",
+                    image: "https://via.placeholder.com/100/138808/ffffff?text=Specialization"
                 },
                 {
                     title: "💡 CORE PHILOSOPHY",
-                    text: "Don't preserve Indian games in a museum. Put them back on the table. We preserve cultural identity while evolving gameplay mechanics.",
+                    text: "Don't preserve Indian games in a museum. Put them back on the table. We treat traditional games as raw material for innovation, allowing their mechanics, stories, and experiences to evolve.",
                     image: "https://via.placeholder.com/100/000080/ffffff?text=Philosophy"
                 },
                 {
                     title: "🛠️ MIXING OLD + NEW MECHANICS",
-                    text: "Blending Pachisi, Chowka Bara, and Gilli Danda with modern deck-building, worker placement, bluffing, and unique player powers.",
+                    text: "Combining traditional gameplay systems with modern mechanics: Deck building, Set collection, Hidden info, Bluffing, Resource management, Worker placement, Area control, & Player powers.",
                     image: "https://via.placeholder.com/100/ff9933/ffffff?text=Mechanics"
                 },
                 {
-                    title: "🎯 CARROM: STREET CHAMPIONS",
-                    text: "Classic Carrom with neighborhood characters, special abilities, objective cards, temporary rule changes, and regional board designs!",
-                    image: "https://via.placeholder.com/100/138808/ffffff?text=Carrom"
+                    title: "📖 INDIAN STORIES AS GAMEPLAY",
+                    text: "Rather than simply putting Indian artwork onto existing mechanics, KHEL ADDA uses Indian mythology, folklore, communities, festivals, and histories as actual gameplay systems.",
+                    image: "https://via.placeholder.com/100/138808/ffffff?text=Storytelling"
+                },
+                {
+                    title: "🏆 CARROM: STREET CHAMPIONS",
+                    text: "Example: Players choose neighborhood characters with unique abilities, complete objective cards, trigger special rule changes, and compete across strategic Indian environments!",
+                    image: "https://via.placeholder.com/100/000080/ffffff?text=Carrom"
                 }
             ];
 
-            let hasUnlocked = false;
             let currentIndex = 0;
             let isRolling = false;
 
-            AFRAME.registerComponent('fluid-dice-interaction', {
+            AFRAME.registerComponent('dice-popup-interaction', {
                 init: function () {
                     const el = this.el;
                     const cardTitle = document.getElementById('card-title');
@@ -121,12 +126,12 @@
                         if (isRolling) return;
                         isRolling = true;
 
-                        // Fluid spring-bounce animation simulating physical roll
-                        const rollDur = 1200;
-                        const targetRotX = Math.floor(Math.random() * 8 + 4) * 360 + (hasUnlocked ? Math.floor(Math.random() * 4) * 90 : 0);
-                        const targetRotY = Math.floor(Math.random() * 8 + 4) * 360 + (hasUnlocked ? Math.floor(Math.random() * 4) * 90 : 0);
+                        // Fluid spring-bounce animation on click
+                        const rollDur = 1000;
+                        const targetRotX = Math.floor(Math.random() * 6 + 2) * 360 + (Math.floor(Math.random() * 4) * 90);
+                        const targetRotY = Math.floor(Math.random() * 6 + 2) * 360 + (Math.floor(Math.random() * 4) * 90);
                         
-                        // Upward hop + multi-axis spin
+                        // Upward hop + multi-axis spin animation
                         el.setAttribute('animation__bounce', {
                             property: 'position',
                             to: '0 0.8 0',
@@ -146,20 +151,15 @@
                         setTimeout(() => {
                             isRolling = false;
 
-                            if (!hasUnlocked) {
-                                // First roll triggers the "Got a 6!" reveal
-                                hasUnlocked = true;
-                                currentIndex = 1; // First info slide
-                                cardHint.textContent = "🎲 Got a 6! Tap again to cycle information.";
-                            } else {
-                                // Subsequent single taps change information layer
-                                currentIndex = (currentIndex % (khelAddaData.length - 1)) + 1;
-                            }
-
+                            // Update data popup index on each click
                             const data = khelAddaData[currentIndex];
                             cardTitle.textContent = data.title;
                             cardText.textContent = data.text;
                             cardImg.src = data.image;
+
+                            // Advance to the next info layer for the next tap
+                            currentIndex = (currentIndex + 1) % khelAddaData.length;
+                            cardHint.textContent = `Tap dice for next card (${currentIndex + 1}/${khelAddaData.length})`;
                         }, rollDur);
                     });
                 }
@@ -196,10 +196,10 @@
                     gltf-model="#dice-model"
                     class="clickable"
                     gesture-handler
-                    fluid-dice-interaction
+                    dice-popup-interaction
                 ></a-entity>
 
-                <!-- Floating 3D AR Transparent UI Display (Positioned Directly Above the Dice) -->
+                <!-- Floating Transparent AR Pop-up Display (Positioned Above the Dice) -->
                 <a-entity 
                     position="0 1.8 0" 
                     rotation="-10 0 0"
@@ -207,14 +207,14 @@
                 >
                     <div class="ar-card">
                         <div class="ar-header">
-                            <h2 id="card-title">🎲 ROLL A 6 TO UNLOCK</h2>
+                            <h2 id="card-title">🎲 KHEL ADDA</h2>
                         </div>
                         <div class="ar-body">
                             <img id="card-img" src="https://via.placeholder.com/100/ff9933/ffffff?text=KHEL+ADDA" alt="Khel Adda Visual" />
-                            <p id="card-text">Tap the dice to roll a 6 and discover how KHEL ADDA is bringing traditional Indian board games back to your table!</p>
+                            <p id="card-text">Tap the 3D dice to explore KHEL ADDA and discover how we are bringing traditional Indian board games back to your table!</p>
                         </div>
                         <div class="ar-footer" id="card-hint">
-                            Tap the 3D dice to roll for the first time
+                            Tap the 3D dice to start exploring (1/6)
                         </div>
                     </div>
                 </a-entity>
