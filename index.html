@@ -6,26 +6,41 @@
         <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
         <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
         <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v6.1.1/dist/aframe-extras.min.js"></script>
-        <!-- HTML Embed / Canvas Renderer for HTML in 3D Space -->
-        <script src="https://supereight.github.io/aframe-html-embed/dist/aframe-html-embed.min.js"></script>
 
         <style>
-            /* HTML Container for 3D Floating AR Pop-up Card */
-            .ar-card {
-                width: 380px;
-                min-height: 240px;
-                background: rgba(18, 18, 24, 0.88);
+            /* Dynamic HTML Pop-up Container anchored at tap coordinates */
+            #click-popup {
+                position: fixed;
+                display: none; /* Hidden by default until tap */
+                width: 320px;
+                background: rgba(18, 18, 24, 0.92);
                 border: 2px solid #ff9933;
-                border-radius: 20px;
+                border-radius: 16px;
                 color: #ffffff;
                 font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-                padding: 18px;
+                padding: 14px;
                 box-sizing: border-box;
-                display: flex;
-                flex-direction: column;
-                justify-content: space-between;
-                box-shadow: 0 0 25px rgba(255, 153, 51, 0.5);
-                backdrop-filter: blur(10px);
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 0 0 15px rgba(255, 153, 51, 0.4);
+                backdrop-filter: blur(12px);
+                -webkit-backdrop-filter: blur(12px);
+                z-index: 99999;
+                pointer-events: auto;
+                transform: translate(-50%, -100%); /* Position box above click point */
+                transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
+            }
+
+            /* Tooltip arrow pointing down to tap location */
+            #click-popup::after {
+                content: '';
+                position: absolute;
+                bottom: -10px;
+                left: 50%;
+                transform: translateX(-50%);
+                border-width: 10px 10px 0;
+                border-style: solid;
+                border-color: #ff9933 transparent;
+                display: block;
+                width: 0;
             }
 
             .ar-header {
@@ -33,105 +48,127 @@
                 align-items: center;
                 justify-content: space-between;
                 border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-                padding-bottom: 8px;
+                padding-bottom: 6px;
             }
 
             .ar-header h2 {
                 margin: 0;
-                font-size: 1.05rem;
+                font-size: 0.95rem;
                 color: #ff9933;
                 text-transform: uppercase;
-                letter-spacing: 1px;
+                letter-spacing: 0.8px;
             }
 
             .ar-body {
                 display: flex;
-                gap: 12px;
-                margin-top: 10px;
+                gap: 10px;
+                margin-top: 8px;
                 align-items: center;
             }
 
             .ar-body img {
-                width: 90px;
-                height: 90px;
-                border-radius: 12px;
+                width: 75px;
+                height: 75px;
+                border-radius: 10px;
                 object-fit: cover;
                 border: 1px solid #138808;
             }
 
             .ar-body p {
                 margin: 0;
-                font-size: 0.85rem;
-                line-height: 1.4;
+                font-size: 0.8rem;
+                line-height: 1.35;
                 color: #e0e0e0;
                 flex: 1;
             }
 
             .ar-footer {
-                font-size: 0.75rem;
+                font-size: 0.7rem;
                 color: #aaa;
                 text-align: center;
                 font-style: italic;
-                margin-top: 10px;
+                margin-top: 8px;
             }
         </style>
 
         <script>
-            // Full KHEL ADDA Dataset (Pop-up sequence on every click)
+            // Full KHEL ADDA Dataset
             const khelAddaData = [
                 {
                     title: "🎲 KHEL ADDA — REIMAGINING CLASSICS",
-                    text: "An Indian board game design studio dedicated to reviving traditional and nostalgic Indian games through contemporary game mechanics, storytelling, and visual design.",
+                    text: "An Indian board game design studio dedicated to reviving traditional and nostalgic Indian games through contemporary mechanics & storytelling.",
                     image: "https://via.placeholder.com/100/ff9933/ffffff?text=KHEL+ADDA"
                 },
                 {
                     title: "🎯 WHAT WE SPECIALIZE IN",
-                    text: "Taking games people already know—Carrom, Pachisi, Chowka Bara, Gilli Danda, Pallankuzhi, Snakes & Ladders—and redesigning the way they are played without losing what makes them Indian.",
+                    text: "Taking games people already know—Carrom, Pachisi, Chowka Bara, Gilli Danda, Pallankuzhi—and redesigning the way they are played.",
                     image: "https://via.placeholder.com/100/138808/ffffff?text=Specialization"
                 },
                 {
                     title: "💡 CORE PHILOSOPHY",
-                    text: "Don't preserve Indian games in a museum. Put them back on the table. We treat traditional games as raw material for innovation, allowing their mechanics, stories, and experiences to evolve.",
+                    text: "Don't preserve Indian games in a museum. Put them back on the table. We treat traditional games as raw material for innovation.",
                     image: "https://via.placeholder.com/100/000080/ffffff?text=Philosophy"
                 },
                 {
                     title: "🛠️ MIXING OLD + NEW MECHANICS",
-                    text: "Combining traditional gameplay systems with modern mechanics: Deck building, Set collection, Hidden info, Bluffing, Resource management, Worker placement, Area control, & Player powers.",
+                    text: "Combining traditional gameplay systems with modern mechanics: Deck building, Set collection, Hidden info, Bluffing, & Worker placement.",
                     image: "https://via.placeholder.com/100/ff9933/ffffff?text=Mechanics"
                 },
                 {
                     title: "📖 INDIAN STORIES AS GAMEPLAY",
-                    text: "Rather than simply putting Indian artwork onto existing mechanics, KHEL ADDA uses Indian mythology, folklore, communities, festivals, and histories as actual gameplay systems.",
+                    text: "Rather than simply putting Indian artwork onto existing mechanics, KHEL ADDA uses Indian mythology, folklore, and history directly in gameplay.",
                     image: "https://via.placeholder.com/100/138808/ffffff?text=Storytelling"
                 },
                 {
                     title: "🏆 CARROM: STREET CHAMPIONS",
-                    text: "Example: Players choose neighborhood characters with unique abilities, complete objective cards, trigger special rule changes, and compete across strategic Indian environments!",
+                    text: "Example: Players choose neighborhood characters with unique abilities, complete objective cards, and trigger special rule changes!",
                     image: "https://via.placeholder.com/100/000080/ffffff?text=Carrom"
                 }
             ];
 
             let currentIndex = 0;
             let isRolling = false;
+            let lastTapX = window.innerWidth / 2;
+            let lastTapY = window.innerHeight / 2;
+
+            // Track screen tap coordinates
+            window.addEventListener('pointerdown', (evt) => {
+                lastTapX = evt.clientX;
+                lastTapY = evt.clientY;
+            });
 
             AFRAME.registerComponent('dice-popup-interaction', {
                 init: function () {
                     const el = this.el;
+                    const popup = document.getElementById('click-popup');
                     const cardTitle = document.getElementById('card-title');
                     const cardText = document.getElementById('card-text');
                     const cardImg = document.getElementById('card-img');
                     const cardHint = document.getElementById('card-hint');
 
-                    el.addEventListener('click', function () {
+                    el.addEventListener('click', function (evt) {
                         if (isRolling) return;
                         isRolling = true;
 
+                        // Calculate click position on screen
+                        let posX = lastTapX;
+                        let posY = lastTapY - 15; // Offset slightly above touch point
+
+                        // Keep popup within screen bounds
+                        const popupWidth = 320;
+                        if (posX - popupWidth / 2 < 10) posX = popupWidth / 2 + 10;
+                        if (posX + popupWidth / 2 > window.innerWidth - 10) posX = window.innerWidth - popupWidth / 2 - 10;
+                        if (posY < 200) posY = lastTapY + 180; // Flip below if tapped near screen top
+
+                        // Apply position directly at tap coordinates
+                        popup.style.left = `${posX}px`;
+                        popup.style.top = `${posY}px`;
+
                         // Fluid spring-bounce animation on click
-                        const rollDur = 1000;
+                        const rollDur = 800;
                         const targetRotX = Math.floor(Math.random() * 6 + 2) * 360 + (Math.floor(Math.random() * 4) * 90);
                         const targetRotY = Math.floor(Math.random() * 6 + 2) * 360 + (Math.floor(Math.random() * 4) * 90);
                         
-                        // Upward hop + multi-axis spin animation
                         el.setAttribute('animation__bounce', {
                             property: 'position',
                             to: '0 0.8 0',
@@ -157,9 +194,12 @@
                             cardText.textContent = data.text;
                             cardImg.src = data.image;
 
-                            // Advance to the next info layer for the next tap
+                            // Show pop-up at tap coordinates
+                            popup.style.display = 'block';
+
+                            // Advance index
                             currentIndex = (currentIndex + 1) % khelAddaData.length;
-                            cardHint.textContent = `Tap dice for next card (${currentIndex + 1}/${khelAddaData.length})`;
+                            cardHint.textContent = `Tap dice again for next card (${currentIndex + 1}/${khelAddaData.length})`;
                         }, rollDur);
                     });
                 }
@@ -168,6 +208,20 @@
     </head>
 
     <body style="margin: 0; overflow: hidden;">
+        <!-- Dynamic Tap-Anchored Screen Overlay -->
+        <div id="click-popup">
+            <div class="ar-header">
+                <h2 id="card-title">🎲 KHEL ADDA</h2>
+            </div>
+            <div class="ar-body">
+                <img id="card-img" src="https://via.placeholder.com/100/ff9933/ffffff?text=KHEL+ADDA" alt="Khel Adda Visual" />
+                <p id="card-text">Tap the 3D dice to explore KHEL ADDA!</p>
+            </div>
+            <div class="ar-footer" id="card-hint">
+                Tap dice to explore
+            </div>
+        </div>
+
         <a-scene
             vr-mode-ui="enabled: false;"
             loading-screen="enabled: false;"
@@ -198,26 +252,6 @@
                     gesture-handler
                     dice-popup-interaction
                 ></a-entity>
-
-                <!-- Floating Transparent AR Pop-up Display (Positioned Above the Dice) -->
-                <a-entity 
-                    position="0 1.8 0" 
-                    rotation="-10 0 0"
-                    html-embed="transparent: true"
-                >
-                    <div class="ar-card">
-                        <div class="ar-header">
-                            <h2 id="card-title">🎲 KHEL ADDA</h2>
-                        </div>
-                        <div class="ar-body">
-                            <img id="card-img" src="https://via.placeholder.com/100/ff9933/ffffff?text=KHEL+ADDA" alt="Khel Adda Visual" />
-                            <p id="card-text">Tap the 3D dice to explore KHEL ADDA and discover how we are bringing traditional Indian board games back to your table!</p>
-                        </div>
-                        <div class="ar-footer" id="card-hint">
-                            Tap the 3D dice to start exploring (1/6)
-                        </div>
-                    </div>
-                </a-entity>
             </a-marker>
 
             <!-- Camera with Raycaster for Click/Tap Detection -->
